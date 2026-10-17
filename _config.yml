@@ -1,0 +1,86 @@
+# GitHub Pages configuration.
+theme: jekyll-theme-chirpy
+lang: ja-JP
+timezone: Asia/Tokyo
+title: '¬(¬Kp)'
+tagline: |-
+  The Shape of the World,
+  the World of Shape
+description: 「形」の科学と医学／医療、翻ってその世界の「形」について、とりとめもなく思案する。
+url: 'https://n-kp.github.io'
+baseurl: ''
+social:
+  name: n-kp
+theme_mode:
+avatar: /assets/img/blog-logo.svg
+toc: true
+comments:
+  provider:
+analytics: {}
+pageviews:
+  provider:
+assets:
+  self_host:
+    enabled: false
+pwa:
+  enabled: false
+  cache:
+    enabled: false
+actions:
+  edit_post:
+    enabled: false
+collections:
+  tabs:
+    output: true
+    sort_by: order
+defaults:
+  - scope:
+      path: ''
+      type: posts
+    values:
+      layout: post
+      author: n-kp
+      comments: false
+      toc: true
+      permalink: /posts/:title/
+  - scope:
+      path: ''
+      type: tabs
+    values:
+      layout: page
+      toc: false
+sass:
+  style: compressed
+kramdown:
+  syntax_highlighter: rouge
+  footnote_backlink: '&#8617;&#xfe0e;'
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  ignore:
+    envs: [development]
+plugins:
+  - jekyll-include-cache
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-archives
+jekyll-archives:
+  enabled: [categories, tags]
+  layouts:
+    category: category
+    tag: tag
+  permalinks:
+    category: /categories/:name/
+    tag: /tags/:name/
+exclude:
+  - vendor
+  - .bundle
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - tools
+  - tests
+  - '*.log'
+  - node_modules
+

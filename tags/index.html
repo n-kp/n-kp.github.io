@@ -1,0 +1,9 @@
+---
+layout: page
+title: タグ
+---
+{% if site.tags.size > 0 %}
+<ul>{% assign groups = site.tags | sort %}{% for group in groups %}
+<li><a href="{{ group[0] | prepend: '/tags/' | append: '/' | relative_url }}">{{ group[0] | escape }}</a>（{{ group[1].size }}）</li>
+{% endfor %}</ul>
+{% else %}<p>記事の掲載後にタグを表示する。</p>{% endif %}

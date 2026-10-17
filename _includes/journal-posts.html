@@ -1,0 +1,13 @@
+{% if include.posts.size > 0 %}
+<ul class="journal-posts">
+  {% for post in include.posts limit: include.limit %}
+  <li>
+    <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: '%Y.%m.%d' }}</time>
+    <a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
+    {% if post.description %}<p>{{ post.description | escape }}</p>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty-state">記事は準備中。</p>
+{% endif %}

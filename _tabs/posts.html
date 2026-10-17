@@ -1,0 +1,20 @@
+---
+title: posts
+icon: fas fa-pen-nib
+order: 1
+permalink: /posts/
+---
+{% if site.categories.size > 0 %}
+<details class="mb-4">
+  <summary>分野から探す</summary>
+  <ul class="mt-2">
+  {% assign categories = site.categories | sort %}
+  {% for category in categories %}
+    {% assign category_slug = category[0] | slugify %}
+    <li><a href="{{ category_slug | prepend: '/categories/' | append: '/' | relative_url }}">{{ category[0] | escape }}</a>（{{ category[1].size }}）</li>
+  {% endfor %}
+  </ul>
+</details>
+{% endif %}
+{% assign articles = site.posts | sort: 'date' | reverse %}
+{% include journal-posts.html posts=articles %}

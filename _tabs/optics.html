@@ -1,0 +1,21 @@
+---
+title: optics
+icon: fas fa-lightbulb
+order: 3
+permalink: /optics/
+---
+<p class="page-subtitle">光学や顕微鏡の初学者のための光学シミュレータや教材など。<br>
+光学現象のイメージをつかむ、光束の寄せ方の光速入門。</p>
+{% assign lessons = site.posts | where: 'series', 'optics' | where_exp: 'post', 'post.lesson_order != nil' | sort: 'lesson_order' %}
+{% if lessons.size > 0 %}
+<ol class="lesson-list">
+{% for lesson in lessons %}
+  <li value="{{ lesson.lesson_order }}"><a href="{{ lesson.url | relative_url }}">{{ lesson.title | escape }}</a></li>
+{% endfor %}
+</ol>
+{% endif %}
+<ul class="simulator-list">
+{% for simulator in site.data.simulators %}
+<li><a href="{{ simulator.url | relative_url }}">{{ simulator.name }}</a> — {{ simulator.label }} <small class="text-muted">/ v{{ simulator.version }}</small></li>
+{% endfor %}
+</ul>

@@ -1,0 +1,9 @@
+---
+layout: page
+title: カテゴリー
+---
+{% if site.categories.size > 0 %}
+<ul>{% assign groups = site.categories | sort %}{% for group in groups %}
+<li><a href="{{ group[0] | prepend: '/categories/' | append: '/' | relative_url }}">{{ group[0] | escape }}</a>（{{ group[1].size }}）</li>
+{% endfor %}</ul>
+{% else %}<p>記事の掲載後にカテゴリーを表示する。</p>{% endif %}

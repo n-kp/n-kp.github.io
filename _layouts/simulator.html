@@ -1,0 +1,10 @@
+---
+layout: default
+---
+<article class="px-1">
+  <h1 class="dynamic-title">{{ page.title | escape }}</h1>
+  <div class="content">
+    <iframe class="simulator-frame" src="{{ page.simulator_src | relative_url }}" title="{{ page.title | escape }} 光学シミュレータ"></iframe>
+  </div>
+</article>
+<script src="{{ '/assets/js/simulator-frame.js' | relative_url }}" defer></script>

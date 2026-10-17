@@ -1,0 +1,13 @@
+---
+layout: default
+---
+<div class="content journal-home">
+  <h1 class="dynamic-title">新着記事</h1>
+  {% assign latest = site.posts | sort: 'date' | reverse %}
+  {% if latest.size > 0 %}
+    {% include journal-posts.html posts=latest limit=10 %}
+  {% else %}
+    <p><a href="{{ '/optics/' | relative_url }}">光束の寄せ →</a></p>
+  {% endif %}
+  {% if latest.size > 10 %}<a href="{{ '/posts/' | relative_url }}">すべての記事 →</a>{% endif %}
+</div>

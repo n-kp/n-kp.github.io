@@ -1,0 +1,153 @@
+<!doctype html>
+<!--
+Original simulator code: MIT License.
+Author: ¬(¬Kp) / n-kp
+
+MIT License
+
+Copyright (c) 2026 n-kp
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>レンズの集光と収差 — Focus v1.1</title>
+<style>*{box-sizing:border-box}:root{color-scheme:light}body{margin:0;background:#fff;color:#272727;font:14px system-ui,sans-serif}header,main{max-width:1000px;margin:auto;padding:0 22px}header{padding-top:22px}h1{font-size:19px;margin:0 0 18px;font-weight:600}h1 small{font-size:12px;color:#888;font-weight:400;margin-left:10px}.controls{display:flex;gap:14px 24px;flex-wrap:wrap;align-items:center;margin:0 0 14px}label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:400}input[type=range]{width:180px;accent-color:#666}select,button{font:inherit;padding:5px 8px;border:1px solid #ccc;border-radius:4px;background:#fff;color:#333}button{cursor:pointer}button:hover{background:#f5f5f5}button:disabled{opacity:.5}.check{display:inline-flex;flex-direction:row;align-items:center;gap:6px}.check input{accent-color:#555}.airy-controls{display:flex;align-items:center;flex-wrap:wrap;gap:7px 12px;margin:8px 0}.airy-controls label{cursor:pointer}input[role="switch"]{appearance:none;width:30px;height:17px;border-radius:12px;background:#c1c8cc;position:relative;margin:0;cursor:pointer}input[role="switch"]:before{content:"";position:absolute;width:13px;height:13px;left:2px;top:2px;border-radius:50%;background:white;transition:transform .15s}input[role="switch"]:checked{background:#437f94}input[role="switch"]:checked:before{transform:translateX(13px)}.pair{display:block}.card{background:#fff;border:0;border-radius:0}.pair:not(.flipped) .card:nth-child(2),.pair.flipped .card:first-child{display:none}.diagrams{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}.diagram{min-width:0}.top{padding:4px 0 8px}.top h2{font-size:13px;color:#777;font-weight:400;margin:0}.badge{display:none}.plot{padding:0}.caption{font-size:11px;color:#888;margin:5px 0 10px}.ray{display:block;width:100%;height:auto;aspect-ratio:505 / 201;background:#f5f9fa;border-radius:6px}.heat{display:block;width:100%;height:auto;aspect-ratio:505 / 201;background:#071626}.lower{display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px;align-items:start;width:100%;margin-top:14px}.spot{display:block;width:320px;max-width:100%;height:auto;aspect-ratio:1;background:#071626}.profile{display:block;width:100%;height:320px}.metrics{display:flex;flex-wrap:wrap;gap:8px 24px;margin:8px 0 14px}.metric{font-size:12px;color:#777}.metric b{font-size:13px;font-weight:500;color:#333;margin-left:6px}.metric small{font-size:11px}details{margin:16px 0 22px;padding-top:12px;border-top:1px solid #eee;font-size:12px;color:#777;line-height:1.8}details th,details td{padding:6px 10px 6px 0;border-bottom:1px solid #eee;vertical-align:top}summary{cursor:pointer;font-size:12px}.status{font-size:12px;color:#888;margin:8px 0;min-height:18px}.note{font-size:11px;color:#888;line-height:1.6}.legend{font-size:11px;color:#888;margin-top:4px}input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid #4792b5;outline-offset:3px}@media(max-width:700px){.diagrams{gap:10px}header,main{padding-left:14px;padding-right:14px}.controls{gap:12px}.lower{grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:8px}.profile{height:260px}.spot{width:260px;height:auto}}
+@media(max-width:480px){.lower{grid-template-columns:minmax(0,1fr)}.spot{width:260px;max-width:100%}.profile{max-width:none}}
+input[role="switch"]:disabled{opacity:.5;cursor:wait;}
+</style><header><h1>レンズの集光と収差 <small>Focus v1.1</small></h1></header><main>
+<div class="controls"><label>レンズ形状<select id="shape"><option value="pc">平凸レンズ</option><option value="bc">対称両凸レンズ</option><option value="ach">アクロマート</option></select></label><label>入射光束径 <span id="dval"></span><input id="diam" type="range" min="4" max="24" step="1" value="22"></label><label>波長 <span id="wval"></span><input id="wave" type="range" min="400" max="700" step="10" value="550"></label><button id="reset">初期値に戻す</button></div>
+<div class="controls"><label class="check"><input id="flip" type="checkbox" role="switch">レンズを裏返す</label></div><div class="controls"><label style="flex:1">観察面 <span id="zval"></span><input style="width:100%" id="z" type="range" min="-2" max="2" step=".01" value="0"></label><label>強度表示<select id="scale"><option value="log">対数</option><option value="lin">線形</option></select></label><button id="focus">焦点に戻す</button></div><div class="status" id="status" role="status" aria-live="polite">計算準備中…</div><div class="pair" id="pair"></div>
+<details><summary>補足</summary>
+<p><strong>光学モデル</strong><br>空気中（屈折率1）に置いた回転対称レンズへ、円形断面の一様な平行単色光を軸上入射させる。z軸は光の進行方向を正とし、入射側の第1面頂点を原点とする。レンズ面は球面または平面で、表方向の処方は次表のとおりである。曲率半径は曲率中心が面頂点より出射側にあるとき正とする。</p>
+<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;text-align:left"><thead><tr><th>レンズ</th><th>材質（入射側から）</th><th>曲率半径（mm）</th><th>中心厚（mm）</th></tr></thead><tbody>
+<tr><td>平凸</td><td>N-BK7</td><td>+50、∞</td><td>6</td></tr>
+<tr><td>対称両凸</td><td>N-BK7</td><td>+100、−100</td><td>6</td></tr>
+<tr><td>アクロマート（独自設計）</td><td>N-BK7、N-SF5</td><td>+50.378802603、−46.254558494、−190.393156881</td><td>6、3</td></tr>
+</tbody></table></div>
+<p>反転時は面とガラスの順序を逆にし、曲率半径の符号を反転する。接着層の厚さは0とする。屈折率はSCHOTTのSellmeier式から事前計算した400〜700 nm・10 nm刻みの31点を参照し、屈折と光路長に同じ値を用いる。係数・屈折率表・丸め前の曲率半径は、このHTML内のスクリプトに収録している。</p>
+<p><strong>光線追跡と光路差</strong><br>各面との交点を求め、Snellの法則で屈折方向を更新し、各区間の屈折率×距離を加算する。最後の面頂点から1 mm後方の共通平面を出射基準面とする。入射半径rの光線について、その面での半径をρ、軸上光線に対する光路長差をΔSとすると、観察位置zに対する位相は φ = (2π/λ)[ΔS + √(L²+ρ²) − L] である。ここでLは出射基準面からzまでの距離、λは真空波長である。</p>
+<p><strong>回折強度の計算</strong><br>入射半径を640等分し、各区間の中点で光線を追跡する。半径変換の振幅補正を含む重み w ∝ √[rρ(dρ/dr)] Δr を用い、重みの和を1に正規化する。観察面の軸からの距離をuとすると、複素振幅は A(u,z) = Σ w exp(iφ) J₀[(2π/λ)ρu/L₀]、強度は I = |A|² とする。J₀は第1種0次Bessel関数、L₀は出射基準面から近軸焦点までの距離である。dρ/drは中点の前後0.2Δrの中心差分で求める。横方向の回折核には、観察位置によらずL₀を用いる。強度は半径0〜80 μmの401点で計算し、スポット像へは半径方向に線形補間して配置する。</p>
+<p><strong>焦点と指標</strong><br>近軸焦点は入射半径0.0001 mmの光線と光軸の交点とする。その前方6 mm〜後方2 mmを走査し、軸上強度が最大となる候補の前後を三分探索24回で細分化して「最良焦点」とする。走査間隔は0.05 mm以下かつ0.25λ(L₀/ρmax)²以下とする（ρmaxは出射基準面での周辺光線半径）。FWHMは中心強度の半値となる最初の半径を線形補間し、その2倍とする。中心が谷の場合や半値位置を求められない場合は表示しない。</p>
+<p>像側NAは最外周光線の出射半角θから NA = sin θ として求める。Airy discの破線円は、同じ波長・NAを持つ理想的な一様円形瞳の第一暗環を示し、半径は0.609834945λ/NAとする。観察面を移動しても円の大きさは固定する。第一暗環径はFWHMとは異なる。計算像には近軸回折核と振幅補正を用いるため、計算像の暗環とこの円は厳密には一致しない場合がある。</p>
+<p><strong>表示範囲と強度尺度</strong><br>縦断面は各向きの最良焦点±2 mmを101点で計算し、横方向は±80 μmを表示する。白破線は最良焦点、橙線は観察面である。スポット像とプロファイルは±40 μmを表示する。簡易光路図と縦断面は縦横で倍率が異なる。</p>
+<p>強度画像は、同じレンズ形状・光束径・波長の「表」向きの最良焦点における軸上強度Irefを基準とする。線形表示はI/Iref、対数表示はlog₁₀(1+999I/Iref)/3を0〜1にクリップして色に対応させる。表裏と観察面の変更ではIrefを維持する。レンズ形状・光束径・波長の変更時には更新するため、異なる条件間の絶対強度の比較にはならない。プロファイルは重みを正規化したIを表示し、無収差時の軸上ピークを1とする。対数表示でも目盛の数値は変換前の相対強度を示す。FWHMは表示用の変換前の強度から求める。</p>
+<p><strong>近似の範囲</strong><br>軸対称のスカラー回折による焦点近傍モデルであり、表面反射・吸収・偏光・高NAのベクトル効果・軸外収差・製造公差を含まない。各表示は単一波長の計算であり、多波長の合成ではない。</p>
+<p>ガラス資料：<a href="https://media.schott.com/api/public/content/820eba3413cc4e788433a3751f8edba9?download=true&amp;v=97b3ea2b">SCHOTT Optical Glass Datasheets</a> · <a href="https://media.schott.com/api/public/content/aaa572afd854434fb7b3faa4bc46103f?v=c0f4fa52">SCHOTT TIE-29</a> · <a href="https://media.schott.com/api/public/content/f8d4ac6649594677ab1b17b05ebd6a8f?v=c75caf58">SCHOTT N-SF5 Datasheet</a></p></details></main>
+<script>
+'use strict';
+// Millimetres throughout. Trace in a meridional plane; integrate a circular pupil.
+const $=id=>document.getElementById(id), N=640, NR=401, RMAX=.08, NZ=101;
+function sag(r,R){return R===0?0:R-Math.sign(R)*Math.sqrt(R*R-r*r)}
+function hit(p,d,v,R){if(R===0){let s=(v-p.z)/d.z;return {x:p.x+s*d.x,z:v,s}}let c=v+R,b=p.x*d.x+(p.z-c)*d.z,q=p.x*p.x+(p.z-c)**2-R*R,disc=b*b-q;if(disc<0)throw Error('球面との交点なし');let roots=[-b-Math.sqrt(disc),-b+Math.sqrt(disc)].filter(s=>s>1e-8);for(let s of roots){let x=p.x+s*d.x,z=p.z+s*d.z;if(Math.abs(z-v-sag(x,R))<1e-5)return{x,z,s}}throw Error('球面交点の選択に失敗')}
+function refract(d,h,v,R,n1,n2){let nx=0,nz=-1;if(R){nx=h.x/Math.abs(R);nz=(h.z-v-R)/Math.abs(R);if(nx*d.x+nz*d.z>0){nx=-nx;nz=-nz}}let c=-(nx*d.x+nz*d.z),e=n1/n2,k=1-e*e*(1-c*c);if(k<0)throw Error('全反射');return{x:e*d.x+(e*c-Math.sqrt(k))*nx,z:e*d.z+(e*c-Math.sqrt(k))*nz}}
+// SCHOTT N-BK7 catalogue Sellmeier coefficients; lambda in micrometres.
+// B=[1.03961212,0.231792344,1.010469450]; C=[0.00600069867,0.0200179144,103.5606530].
+// n=sqrt(1+sum(B_i*lambda^2/(lambda^2-C_i))). Precomputed in Python binary64.
+// Sources: SCHOTT Optical Glass Datasheets / N-BK7 and TIE-29; retrieved 2026-10-15.
+// Table has 31 entries at 400+10*i nm. No runtime Sellmeier evaluation.
+const NBK7_INDEX=[1.5308485382492993, 1.5295687672239822, 1.5283853345951357, 1.5272882650886161, 1.5262688601289898, 1.5253195028678679, 1.5244334977011411, 1.5236049373630842, 1.5228285922279536, 1.522099817614206, 1.5214144757734767, 1.5207688699278228, 1.5201596882462758, 1.5195839560632158, 1.5190389949642533, 1.5185223876207927, 1.5180319474576867, 1.5175656924009988, 1.5171218220837157, 1.516698697993053, 1.5162948261290008, 1.515908841813981, 1.515539496351094, 1.5151856452759003, 1.514846237985938, 1.5145203085647796, 1.5142069676446184, 1.5139053951741006, 1.5136148339772117, 1.5133345840051025, 1.513063997196311];
+// SCHOTT N-SF5: B=[1.524818890,0.187085527,1.427290150],
+// C_um2=[0.011254756,0.0588995392,129.14167500]; computed offline 2026-10-15.
+const NSF5_INDEX=[1.7130387763852277, 1.7089087589030492, 1.7051832895141505, 1.7018056909410324, 1.698729624618007, 1.6959167766285026, 1.6933351507829244, 1.69095778826669, 1.6887617926995775, 1.6867275776150694, 1.6848382784389386, 1.6830792878496383, 1.6814378848744218, 1.6799029360394904, 1.678464652508272, 1.6771143911586193, 1.6758444904607863, 1.6746481341538046, 1.6735192373026837, 1.6724523505073736, 1.671442578934582, 1.6704855135315893, 1.6695771723117427, 1.6687139500136732, 1.6678925747592819, 1.66711007059035, 1.6663637249659986, 1.6656510604649937, 1.6649698100669783, 1.664317895491911, 1.663693408162546];
+// Independent design v0.2 (22 mm design pupil), generated from thin achromat powers and constrained WFE optimisation.
+const ACHROMAT_RADII=[50.37880260338887, -46.25455849423106, -190.39315688098145];
+function glassIndex(wave,material='N-BK7'){
+ let i=(wave-400)/10,table=material==='N-BK7'?NBK7_INDEX:material==='N-SF5'?NSF5_INDEX:null;
+ if(!table)throw Error('未定義のガラス');
+ if(!Number.isInteger(i)||i<0||i>=table.length)throw Error('波長は400〜700 nmの10 nm刻みで指定してください');
+ return table[i];
+}
+function lensSpec(shape,reverse,wave){
+ let rs,vs,materials;
+ if(shape==='ach'){rs=ACHROMAT_RADII.slice();vs=[0,6,9];materials=['N-BK7','N-SF5']}
+ else if(shape==='bc'){rs=[100,-100];vs=[0,6];materials=['N-BK7']}
+ else if(shape==='pc'){rs=[50,0];vs=[0,6];materials=['N-BK7']}
+ else throw Error('未定義のレンズ');
+ let thickness=vs[vs.length-1];
+ if(reverse){rs=rs.reverse().map(r=>-r);vs=vs.reverse().map(v=>thickness-v);materials.reverse()}
+ return {rs,vs,materials,indices:[1,...materials.map(g=>glassIndex(wave,g)),1],exitZ:thickness+1,thickness,radius:shape==='ach'?12.5:13};
+}
+function trace(r,opt){
+ let p={x:r,z:-5},d={x:0,z:1},opl=0,pts=[p];
+ for(let j=0;j<opt.rs.length;j++){
+  let h=hit(p,d,opt.vs[j],opt.rs[j]);opl+=h.s*opt.indices[j];
+  d=refract(d,h,opt.vs[j],opt.rs[j],opt.indices[j],opt.indices[j+1]);
+  p={x:h.x,z:h.z};pts.push(p);
+ }
+ let s=(opt.exitZ-p.z)/d.z;opl+=s;p={x:p.x+s*d.x,z:opt.exitZ};
+ return {r,x:p.x,opl,d,pts,zfocus:opt.exitZ-p.x/d.x*d.z};
+}
+function j0(x){let ax=Math.abs(x),y;if(ax<8){y=x*x;return(57568490574+y*(-13362590354+y*(651619640.7+y*(-11214424.18+y*(77392.33017+y*-184.9052456)))))/(57568490411+y*(1029532985+y*(9494680.718+y*(59272.64853+y*(267.8532712+y))))) }let z=8/ax;y=z*z;let xx=ax-.785398164;return Math.sqrt(.636619772/ax)*(Math.cos(xx)*(1+y*(-.001098628627+y*(.00002734510407+y*(-.000002073370639+y*.0000002093887211))))-z*Math.sin(xx)*(-.01562499995+y*(.0001430488765+y*(-.000006911147651+y*(.0000007621095161-y*.0000000934945152))))) }
+function makeModel(reverse,shape,diam,wave,n=N){
+ const opt=lensSpec(shape,reverse,wave);
+ let a=diam/2,k=2*Math.PI/(wave*1e-6),ax=trace(0,opt),pf=trace(.0001,opt).zfocus,L=pf-opt.exitZ,out=trace(a,opt).x,dr=a/n,arr=[];
+ for(let i=0;i<n;i++){
+  let r=(i+.5)*dr,t=trace(r,opt),eps=dr*.2,der=(trace(r+eps,opt).x-trace(r-eps,opt).x)/(2*eps);
+  arr.push({x:t.x,op:t.opl-ax.opl,w:Math.sqrt(Math.max(0,r*t.x*der))*dr/(out*out/2)});
+ }
+ let norm=arr.reduce((s,t)=>s+t.w,0);for(let t of arr)t.w/=norm;
+ let m={opt,rs:opt.rs,exitZ:opt.exitZ,a,k,pf,L,out,arr,reverse,shape,wave,ax};m.best=bestFocus(m);return m;
+}
+function phases(m,z){let L=z-m.exitZ;return m.arr.map(t=>{let phi=m.k*(t.op+t.x*t.x/(Math.sqrt(L*L+t.x*t.x)+L));return[t.w*Math.cos(phi),t.w*Math.sin(phi)]})}
+function axial(m,z){let ph=phases(m,z),re=0,im=0;for(let t of ph){re+=t[0];im+=t[1]}return re*re+im*im}
+function bestFocus(m){let lo=m.pf-6,count=Math.ceil(8/Math.min(.05,.25*(2*Math.PI/m.k)*(m.L/m.out)**2)),step=8/count,bz=lo,bv=-1;for(let i=0;i<=count;i++){let z=lo+i*step,v=axial(m,z);if(v>bv){bz=z;bv=v}}let l=bz-step,h=bz+step;for(let i=0;i<24;i++){let a=l+(h-l)/3,b=h-(h-l)/3;if(axial(m,a)>axial(m,b))h=b;else l=a}return(l+h)/2}
+function kernel(m){let K=new Float64Array(NR*m.arr.length);for(let j=0;j<NR;j++)for(let i=0;i<m.arr.length;i++)K[j*m.arr.length+i]=j0(m.k*m.arr[i].x*(j*RMAX/(NR-1))/m.L);return K}
+function radial(m,z,K){let ph=phases(m,z),res=new Float64Array(NR),n=m.arr.length;for(let j=0;j<NR;j++){let re=0,im=0;for(let i=0;i<n;i++){let b=K[j*n+i];re+=b*ph[i][0];im+=b*ph[i][1]}res[j]=re*re+im*im}return res}
+function fwhm(p){if(p[1]>p[0]*1.001||p[0]<1e-8)return null;let h=p[0]/2;for(let i=1;i<p.length;i++)if(p[i]<h)return 2*(i-1+(p[i-1]-h)/(p[i-1]-p[i]))*RMAX/(NR-1)*1000;return null}
+const GREEN_FIRE_BLUE=[[0,0,0],[0,1,2],[0,2,5],[0,3,7],[0,5,10],[0,6,13],[0,7,15],[0,9,18],[0,10,21],[0,11,23],[0,13,26],[0,14,29],[0,15,31],[0,17,34],[0,18,37],[0,19,39],[0,21,42],[0,22,45],[0,23,47],[0,25,50],[0,26,53],[0,27,55],[0,29,58],[0,30,61],[0,31,63],[0,33,66],[0,34,69],[0,35,71],[0,37,74],[0,38,77],[0,39,79],[0,41,82],[0,42,85],[0,43,87],[0,45,90],[0,46,92],[0,47,95],[0,49,98],[0,50,100],[0,51,103],[0,53,106],[0,54,108],[0,55,111],[0,57,114],[0,58,116],[0,59,119],[0,61,122],[0,62,124],[0,63,127],[0,65,130],[0,66,132],[0,67,135],[0,69,138],[0,70,140],[0,71,143],[0,73,146],[0,74,148],[0,75,151],[0,77,154],[0,78,156],[0,79,159],[0,81,162],[0,82,164],[0,85,170],[0,85,170],[0,87,167],[0,90,164],[0,92,162],[0,95,159],[0,98,156],[0,100,154],[0,103,151],[0,106,148],[0,108,146],[0,111,143],[0,114,140],[0,116,138],[0,119,135],[0,122,132],[0,124,130],[0,127,127],[0,130,124],[0,132,122],[0,135,119],[0,138,116],[0,140,114],[0,143,111],[0,146,108],[0,148,106],[0,151,103],[0,154,100],[0,156,98],[0,159,95],[0,162,92],[0,164,90],[0,167,87],[0,170,85],[0,172,82],[0,175,79],[0,177,77],[0,180,74],[0,183,71],[0,185,69],[0,188,66],[0,191,63],[0,193,61],[0,196,58],[0,199,55],[0,201,53],[0,204,50],[0,207,47],[0,209,45],[0,212,42],[0,215,39],[0,217,37],[0,220,34],[0,223,31],[0,225,29],[0,228,26],[0,231,23],[0,233,21],[0,236,18],[0,239,15],[0,241,13],[0,244,10],[0,247,7],[0,249,5],[0,255,0],[0,255,0],[3,255,0],[7,255,0],[11,255,0],[15,255,0],[19,255,0],[23,255,0],[27,255,0],[31,255,0],[35,255,0],[39,255,0],[43,255,0],[47,255,0],[51,255,0],[55,255,0],[59,255,0],[63,255,0],[67,255,0],[71,255,0],[75,255,0],[79,255,0],[83,255,0],[87,255,0],[91,255,0],[95,255,0],[99,255,0],[103,255,0],[107,255,0],[111,255,0],[115,255,0],[119,255,0],[123,255,0],[127,255,0],[131,255,0],[135,255,0],[139,255,0],[143,255,0],[147,255,0],[151,255,0],[155,255,0],[159,255,0],[163,255,0],[167,255,0],[171,255,0],[175,255,0],[179,255,0],[183,255,0],[187,255,0],[191,255,0],[195,255,0],[199,255,0],[203,255,0],[207,255,0],[211,255,0],[215,255,0],[219,255,0],[223,255,0],[227,255,0],[231,255,0],[235,255,0],[239,255,0],[243,255,0],[247,255,0],[255,255,0],[255,255,0],[255,255,3],[255,255,7],[255,255,11],[255,255,15],[255,255,19],[255,255,23],[255,255,27],[255,255,31],[255,255,35],[255,255,39],[255,255,43],[255,255,47],[255,255,51],[255,255,55],[255,255,59],[255,255,63],[255,255,67],[255,255,71],[255,255,75],[255,255,79],[255,255,83],[255,255,87],[255,255,91],[255,255,95],[255,255,99],[255,255,103],[255,255,107],[255,255,111],[255,255,115],[255,255,119],[255,255,123],[255,255,127],[255,255,131],[255,255,135],[255,255,139],[255,255,143],[255,255,147],[255,255,151],[255,255,155],[255,255,159],[255,255,163],[255,255,167],[255,255,171],[255,255,175],[255,255,179],[255,255,183],[255,255,187],[255,255,191],[255,255,195],[255,255,199],[255,255,203],[255,255,207],[255,255,211],[255,255,215],[255,255,219],[255,255,223],[255,255,227],[255,255,231],[255,255,235],[255,255,239],[255,255,243],[255,255,247],[255,255,255]];
+function colour(v,reference){v/=Math.max(reference,1e-12);let t=$('scale').value==='log'?Math.log10(1+999*Math.max(v,0))/3:v;t=Math.max(0,Math.min(1,t));return GREEN_FIRE_BLUE[Math.round(t*255)]}
+
+let models=[],timer,showAiry=false;
+function imageNA(m){return Math.abs(trace(m.a,m.opt).d.x)}
+function airyRadius(m){return 0.609834945*m.wave*1e-6/imageNA(m)}
+function updateStatus(){if(!models.length)return;let m=models[$('flip').checked?1:0],w=m.wave;$('status').textContent=(m.shape==='ach'?`N-BK7 / N-SF5 · n = ${glassIndex(w).toFixed(6)} / ${glassIndex(w,'N-SF5').toFixed(6)}`:`N-BK7 · n = ${glassIndex(w).toFixed(6)}`)+` · 像側NA = ${imageNA(m).toFixed(4)}`}
+function toggleAiry(checked){showAiry=checked;for(let i=0;i<2;i++)$('airy'+i).checked=checked;display()}
+function panel(i,title){return `<section class="card"><div class="top"><h2>${title}</h2></div><div class="plot"><div class="diagrams"><div class="diagram"><canvas class="ray" id="ray${i}" width="505" height="201" aria-label="レンズと屈折光線"></canvas><div class="caption">簡易光路図</div></div><div class="diagram"><canvas class="heat" id="heat${i}" width="505" height="201" aria-label="焦点近傍の縦断面強度"></canvas><div class="caption" id="range${i}"></div></div></div><div class="lower"><div><canvas class="spot" id="spot${i}" width="401" height="401" aria-label="観察面のスポット像"></canvas><div class="caption" id="spotlabel${i}"></div><div class="airy-controls"><label class="check"><input type="checkbox" role="switch" id="airy${i}" ${showAiry?'checked':''} onchange="toggleAiry(this.checked)">Airy disc</label><span class="note" id="airylabel${i}"></span></div></div><div><canvas class="profile" id="profile${i}" width="360" height="180" aria-label="径方向強度プロファイル"></canvas><div class="caption">横断面強度プロファイル（± 40 μm）</div></div></div></div></section>`}
+
+// Approximate visible-spectrum colours for illustration only.
+function rayColour(){let w=+$('wave').value,stops=[[400,139,60,230],[450,66,87,238],[490,0,170,220],[530,42,177,78],[570,210,183,0],[610,244,126,23],[650,224,48,36],[700,180,24,36]],j=0;while(j<stops.length-2&&w>stops[j+1][0])j++;let a=stops[j],b=stops[j+1],u=Math.max(0,Math.min(1,(w-a[0])/(b[0]-a[0])));return 'rgba('+[1,2,3].map(k=>Math.round(a[k]*(1-u)+b[k]*u)).join(',')+',0.72)'}
+function rays(m,i,z){
+ let c=$('ray'+i),g=c.getContext('2d'),W=c.width,H=c.height,x=z=>35+(z+8)/125*(W-55),y=r=>H/2-r*4.4;
+ g.clearRect(0,0,W,H);g.strokeStyle='#bacbd2';g.beginPath();g.moveTo(0,H/2);g.lineTo(W,H/2);g.stroke();
+ const opt=m.opt;
+ for(let face=0;face<opt.rs.length-1;face++){
+  const sf=opt.materials[face]==='N-SF5';g.fillStyle=sf?'#d5d9ec':'#bde4e8';g.strokeStyle=sf?'#8c94b5':'#52a4b0';g.beginPath();
+  for(let j=0;j<=60;j++){let r=-opt.radius+j*2*opt.radius/60;let xx=x(opt.vs[face]+sag(r,opt.rs[face]));j?g.lineTo(xx,y(r)):g.moveTo(xx,y(r))}
+  for(let j=60;j>=0;j--){let r=-opt.radius+j*2*opt.radius/60;g.lineTo(x(opt.vs[face+1]+sag(r,opt.rs[face+1])),y(r))}
+  g.closePath();g.fill();g.stroke();
+ }
+ for(let j=-5;j<=5;j++){
+  let t=trace(m.a*j/5,opt);g.strokeStyle=rayColour();g.beginPath();t.pts.forEach((p,k)=>k?g.lineTo(x(p.z),y(p.x)):g.moveTo(x(p.z),y(p.x)));
+  g.lineTo(x(115),y(t.x+(115-m.exitZ)*t.d.x/t.d.z));g.stroke();
+ }
+ g.strokeStyle='#dc9638';g.beginPath();g.moveTo(x(z),10);g.lineTo(x(z),H-10);g.stroke();
+ g.fillStyle='#365868';g.font='12px sans-serif';g.fillText('平行入射 →',10,20);g.fillText('観察面',Math.min(W-55,x(z)+5),20);
+ if(m.shape==='ach'){g.font='11px sans-serif';g.fillText(opt.materials.join(' → '),10,H-12)}
+}
+function heat(m,i,z){let c=$('heat'+i),g=c.getContext('2d'),im=g.createImageData(NZ,201);for(let x=0;x<NZ;x++)for(let y=0;y<201;y++){let r=Math.abs(y-100)*(NR-1)/100,v=m.map[x][r],co=colour(v,m.reference),p=(y*NZ+x)*4;im.data[p]=co[0];im.data[p+1]=co[1];im.data[p+2]=co[2];im.data[p+3]=255}let tmp=document.createElement('canvas');tmp.width=NZ;tmp.height=201;tmp.getContext('2d').putImageData(im,0,0);g.drawImage(tmp,0,0,c.width,c.height);g.setLineDash([5,5]);g.strokeStyle='#ffffffaa';g.beginPath();g.moveTo(c.width/2,0);g.lineTo(c.width/2,c.height);g.stroke();g.setLineDash([]);let xx=(z-(m.best-2))/4*c.width;if(xx>=0&&xx<=c.width){g.strokeStyle='#ffa943';g.lineWidth=2;g.beginPath();g.moveTo(xx,0);g.lineTo(xx,c.height);g.stroke()}$('range'+i).textContent=`縦断面強度分布 ｜ z ${(m.best-2).toFixed(2)} → ${(m.best+2).toFixed(2)} mm ｜ 横方向 ±80 µm${xx<0||xx>c.width?' ｜ 観察面は図の範囲外':''}`}
+function display(){if(!models.length)return;let val=+$('z').value;let active=models[$('flip').checked?1:0];updateStatus();$('zval').textContent=`最良焦点 ${val>=0?'+':''}${val.toFixed(2)} mm（最良焦点z ${active.best.toFixed(3)} mm）`;for(let i=0;i<2;i++){let m=models[i],z=m.best+val,p=radial(m,z,m.K),fw=fwhm(p);rays(m,i,z);heat(m,i,z);$('spotlabel'+i).textContent=`横断面強度分布（± 40 μm） · FWHM ${fw?fw.toFixed(2)+' μm':'—'}`;let c=$('spot'+i),g=c.getContext('2d'),im=g.createImageData(401,401);for(let y=0;y<401;y++)for(let x=0;x<401;x++){let r=Math.hypot(x-200,y-200)*(NR-1)/400,idx=Math.floor(r),u=r-idx,v=idx>=NR-1?0:p[idx]*(1-u)+p[idx+1]*u,co=colour(v,m.reference),q=(y*401+x)*4;im.data.set([...co,255],q)}g.putImageData(im,0,0);
+let ar=airyRadius(m),rp=ar/.0002;$('airylabel'+i).textContent=`第一暗環径 ${(2*ar*1000).toFixed(2)} μm`;
+if(showAiry){g.save();g.setLineDash([4,3]);g.beginPath();g.arc(200,200,rp,0,2*Math.PI);g.strokeStyle='rgba(0,0,0,0.85)';g.lineWidth=3;g.stroke();g.strokeStyle='rgba(255,255,255,0.95)';g.lineWidth=1.3;g.stroke();g.restore()}
+c=$('profile'+i);c.width=Math.max(180,Math.round(c.clientWidth||360));c.height=Math.round($('spot'+i).clientHeight||320);g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);let left=48,right=c.width-12,top=18,bottom=c.height-32,isLog=$('scale').value==='log';const fy=v=>bottom-(bottom-top)*(isLog?Math.log10(1+999*v)/3:v);g.font='11px sans-serif';g.lineWidth=1;let ticks=isLog?[0,.001,.01,.1,1]:[0,.25,.5,.75,1];for(let v of ticks){let yy=fy(v);g.strokeStyle='#e5ebee';g.beginPath();g.moveTo(left,yy);g.lineTo(right,yy);g.stroke();g.fillStyle='#587583';g.textAlign='right';g.fillText(String(v),left-7,yy+4)}g.strokeStyle='#a9bec7';g.beginPath();g.moveTo(left,top);g.lineTo(left,bottom);g.lineTo(right,bottom);g.stroke();g.fillStyle='#587583';g.textAlign='center';for(let v of [-40,-20,0,20,40]){let xx=left+(v+40)/80*(right-left);g.beginPath();g.moveTo(xx,bottom);g.lineTo(xx,bottom+4);g.stroke();g.fillText(v>0?'+'+v:String(v),xx,bottom+18)}g.textAlign='left';g.fillText('相対強度',left,10);g.textAlign='right';g.fillText('μm',right,bottom+30);g.strokeStyle='#079c90';g.lineWidth=2;g.beginPath();for(let j=0;j<=400;j++){let v=p[Math.abs(j-200)*(NR-1)/400],xx=left+j/400*(right-left),yy=fy(v);j?g.lineTo(xx,yy):g.moveTo(xx,yy)}g.stroke()}}
+
+function setZ(){if(!models.length)return;let s=$('z');s.min=-2;s.max=2;s.value=0;display()}
+async function compute(){document.querySelectorAll('input,select,button').forEach(e=>e.disabled=true);let start=performance.now();$('status').textContent='レンズの光路と焦点近傍の強度を計算中…';$('dval').textContent=$('diam').value+' mm';$('wval').textContent=$('wave').value+' nm';await new Promise(r=>setTimeout(r,20));try{let shape=$('shape').value,dm=+$('diam').value,w=+$('wave').value;models=[makeModel(false,shape,dm,w),makeModel(true,shape,dm,w)];$('pair').innerHTML=panel(0,shape==='pc'?'曲面から入射':shape==='ach'?'N-BK7側から入射':'両凸レンズ · 正方向')+panel(1,shape==='pc'?'平面から入射':shape==='ach'?'N-SF5側から入射':'両凸レンズ · 反転');const frontReference=axial(models[0],models[0].best);for(let m of models){m.reference=frontReference;m.K=kernel(m);m.map=[];for(let j=0;j<NZ;j++){m.map.push(radial(m,m.best-2+4*j/(NZ-1),m.K));if(j%20===0)await new Promise(r=>setTimeout(r,0))}}setZ();updateStatus()}catch(e){$('status').textContent='計算エラー：'+e.message;console.error(e)}finally{document.querySelectorAll('input,select,button').forEach(e=>e.disabled=false);layout()}}
+function layout(){ $('pair').className='pair'+($('flip').checked?' flipped':'');if(models.length&&!busy)display()}
+$('flip').onchange=layout;if(typeof window!=='undefined')window.addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(()=>{if(!busy)display()},120)});
+let busy=false,pending=false;async function rebuild(){if(busy){pending=true;return}busy=true;do{pending=false;await compute()}while(pending);busy=false}
+for(let id of ['shape','diam','wave'])$(id).addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(rebuild,160)});$('z').oninput=()=>{if(!busy)display()};$('scale').onchange=()=>{if(!busy)display()};$('focus').onclick=setZ;$('reset').onclick=()=>{$('shape').value='pc';$('diam').value=22;$('wave').value=550;$('scale').value='log';$('flip').checked=false;showAiry=false;layout();rebuild()};rebuild();
+</script></html>
