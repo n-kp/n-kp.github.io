@@ -1,0 +1,93 @@
+<!doctype html>
+<!--
+MIT License
+
+Copyright (c) 2026 n-kp
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+--> 
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>波の基本</title>
+<style>
+:root{color-scheme:light;--ink:#25323a;--muted:#667780;--line:#dce4e8;--a:#167f91;--b:#c16a39}*{box-sizing:border-box}body{margin:0;background:#f4f6f7;color:var(--ink);font:15px/1.65 system-ui,-apple-system,sans-serif}main{max-width:1120px;margin:auto;padding:28px 22px 40px}h1{font-size:26px;letter-spacing:.04em;margin:0}h2{font-size:17px;margin:0}.subtitle{color:var(--muted);margin:4px 0 20px}.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}.toolbar,.row,.legend{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.toolbar{justify-content:space-between}.row{margin-top:12px}button,select,input{font:inherit}button,select{border:1px solid #bdcbd2;background:white;color:var(--ink);border-radius:7px;padding:7px 13px}button{cursor:pointer}button:hover{background:#eef3f5}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #91baca;outline-offset:3px}.primary{background:#253e4a;color:white;border-color:#253e4a}.primary:hover{background:#365562}button[aria-pressed=true]{background:#e9f4f5;border-color:var(--a)}.plot{position:relative;margin-top:12px}canvas{width:100%;height:340px;display:block}.legend{font-size:13px;color:var(--muted);margin:4px 0}.dot{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}.source{border-top:3px solid var(--a)}.source.b{border-top-color:var(--b)}.source header{display:flex;align-items:center;justify-content:space-between}.control{display:grid;grid-template-columns:145px 1fr 85px;gap:12px;align-items:center;margin-top:18px}.control input[type=range]{width:100%;accent-color:var(--a)}.b input[type=range]{accent-color:var(--b)}input[type=number]{width:85px;padding:4px;border:1px solid var(--line);border-radius:5px}small,.note{color:var(--muted);font-size:13px}.note{margin-bottom:0}.badge{font-size:12px;letter-spacing:.06em;color:var(--muted)}.readout{font-variant-numeric:tabular-nums}.disabled{opacity:.5}fieldset{border:0;padding:0;margin:0;min-width:0}summary{cursor:pointer;font-weight:600}details p{margin:10px 0 0}.foot{font-size:12px;color:var(--muted)}@media(max-width:650px){main{padding:18px 12px}h1{font-size:22px}.cards{grid-template-columns:1fr;gap:0}.panel{padding:14px}canvas{height:290px}.control{grid-template-columns:1fr 85px;gap:9px}.control label{grid-column:1 / -1}}
+table th,table td{padding:10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}table thead{background:#f4f6f7}details h3{font-size:15px;margin:18px 0 6px}
+/* Typography aligned with lens-focus-v1.1.html. */
+body{font:14px system-ui,sans-serif}
+h1{font-size:19px;font-weight:600}
+details{font-size:12px;color:#777;line-height:1.8}
+details summary{font-size:12px;font-weight:400}
+details h3{font-size:12px}
+details table{font-size:inherit!important}
+</style></head><body><main>
+<h1 style="margin-bottom:20px">波の基本</h1>
+<section class="panel"><div class="toolbar"><div class="row" style="margin:0"><button id="pause">時間を一時停止</button><button id="reset">リセット</button><button id="both">両波源を同時に開始</button></div></div>
+<div class="row"><fieldset id="mode"><legend>右側のオブジェクト</legend><div class="row" style="margin-top:4px"><label><input type="radio" name="mode" value="none" checked> なし</label><label><input type="radio" name="mode" value="wall"> 反射面</label><label><input type="radio" name="mode" value="b"> 波源B</label></div></fieldset><label id="wallControl" style="margin-left:auto" hidden>反射の種類 <select id="wall"><option value="fixed">固定端（反転）</option><option value="free">自由端（非反転）</option></select></label></div>
+<div class="plot"><canvas id="plot" role="img" aria-label="横軸は位置、縦軸は波の値。波源Aは位置20、波源Bまたは反射面は位置80。"></canvas></div>
+<div class="legend"><span><i class="dot" style="background:#25323a"></i><span id="sumLabel">合成波（u = u<sub>A</sub>）</span></span><label><input type="checkbox" id="components" checked> 成分を表示</label><span id="legA"><i class="dot" style="background:#167f91"></i>進行波</span><span id="legB"><i class="dot" style="background:#c16a39"></i>Bの波／反射波</span><span style="margin-left:auto">波速 v = fλ = 10 仮想単位/s（一定）</span></div>
+</section>
+<div class="cards" id="cards"></div>
+<details class="panel"><summary>補足</summary>
+<h3>計算モデル</h3>
+<p>位置 x ∈ [0, 100]、波速 v = 10 仮想単位/s の一次元・線形・非分散モデルとした。波源A、Bをそれぞれ x = 20、80 に配置し、各波源から等振幅の波を左右へ伝播させた。波源は通過波を反射しない。</p>
+<p>波源信号を s<sub>j</sub>(t) = a<sub>j</sub>(t) sin φ<sub>j</sub>(t)、dφ<sub>j</sub>/dt = 2πf<sub>j</sub> とし、u<sub>j</sub>(x,t) = s<sub>j</sub>(t − |x − x<sub>j</sub>|/v) を加算した。t &lt; 0 の信号は0とした。初期位相は0、波長は λ<sub>j</sub> = v/f<sub>j</sub> とした。周波数変更時も位相を連続させ、停止中も位相を進めた。</p>
+<p>開始・停止および振幅変更時には、変更直前の振幅 a<sub>0</sub> から目標振幅 a<sub>1</sub> へ、a(τ) = a<sub>0</sub> + (a<sub>1</sub> − a<sub>0</sub>)[1 − cos(πτ/T)]/2（0 ≤ τ ≤ T）で移行させた。T = max[0.4 s, 1/(2f)] とし、変更時の周波数から定めた。移行終了後は目標振幅を維持した。</p>
+<p>時間刻みは Δt = 1/120 s とし、各ステップで位相を 2πfΔt だけ更新した。波源信号は4096点の循環バッファーに保存し、遅延時刻の値を線形補間した。</p>
+<h3>境界条件</h3>
+<p>場の両端は無反射とした。反射面を x = 80 に置く場合、x ≤ 80 において u(x,t) = s<sub>A</sub>(t − |x − 20|/v) + R s<sub>A</sub>(t − (140 − x)/v) とした。固定端は R = −1（u = 0）、自由端は R = +1（∂u/∂x = 0）とし、x &gt; 80 の場は0とした。反射面への透過・吸収は扱わない。</p>
+<h3>反射の対応例</h3>
+<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th scope="col">種類</th><th scope="col">反射する量</th><th scope="col">例</th></tr></thead><tbody>
+<tr><th scope="row">固定端反射<br>符号反転</th><td>弦の変位</td><td>端を固定した弦</td></tr>
+<tr><th scope="row">自由端反射<br>符号非反転</th><td>弦の変位</td><td>端が摩擦なく横方向へ動ける弦</td></tr>
+<tr><th scope="row">固定端型<br>位相がπ変化</th><td>光の電場</td><td>低屈折率側から高屈折率側への反射（空気→ガラスなど）<br>理想的な完全導体の鏡面での反射</td></tr>
+<tr><th scope="row">自由端型<br>位相変化なし</th><td>光の電場</td><td>高屈折率側から低屈折率側への反射（ガラス→空気など）</td></tr>
+</tbody></table></div>
+<p>光の例は垂直入射を前提とし、屈折率による分類は透明な非磁性媒質に限る。「固定端型」「自由端型」は電場の位相反転の対応を示し、反射振幅が入射振幅と等しいことを意味しない。実際の銀・アルミニウム鏡では複素屈折率と膜構造に応じて位相・振幅が変化し、厳密な固定端反射とは一致しない。</p>
+<p style="font-size:12px">参考：<a href="https://openstax.org/books/university-physics-volume-3/pages/3-4-interference-in-thin-films" target="_blank" rel="noopener noreferrer">OpenStax, Interference in Thin Films</a>；<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5287145/" target="_blank" rel="noopener noreferrer">Phase Shift Effects in Fabry–Perot Interferometry</a></p>
+</details>
+</main><script>
+'use strict';
+// CORE_START
+const SPEED=10,DT=1/120,SIZE=4096;
+class Emitter{
+ constructor(){this.frequency=.5;this.amplitude=1;this.on=false;this.clear()}
+ clear(){this.phase=0;this.level=0;this.target=0;this.rampStart=0;this.rampTime=0;this.rampDuration=.4;this.on=false;this.history=new Float64Array(SIZE);this.tick=0}
+ step(){this.phase=(this.phase+2*Math.PI*this.frequency*DT)%(2*Math.PI);const target=this.on?this.amplitude:0;if(target!==this.target){this.target=target;this.rampStart=this.level;this.rampTime=0;this.rampDuration=Math.max(.4,.5/this.frequency)}this.rampTime=Math.min(this.rampDuration,this.rampTime+DT);const q=this.rampTime/this.rampDuration;const envelope=(1-Math.cos(Math.PI*q))/2;this.level=this.rampStart+(this.target-this.rampStart)*envelope;this.tick++;this.history[this.tick%SIZE]=this.level*Math.sin(this.phase)}
+ sample(time){if(time<0)return 0;const index=time/DT;const a=Math.floor(index),f=index-a;if(a<this.tick-SIZE+2||a>this.tick)return 0;const b=Math.min(a+1,this.tick);return this.history[a%SIZE]*(1-f)+this.history[b%SIZE]*f}
+}
+function field(a,b,t,x,mode,reflection=-1){if(mode==='wall'&&x>80)return [0,0];const direct=a.sample(t-Math.abs(x-20)/SPEED);const other=mode==='b'?b.sample(t-Math.abs(x-80)/SPEED):mode==='wall'?reflection*a.sample(t-(140-x)/SPEED):0;return [direct,other]}
+// CORE_END
+const $=id=>document.getElementById(id),a=new Emitter(),b=new Emitter();let tick=0,paused=false,mode='none',reflection=-1,accumulator=0,last=0;
+function makeCard(id,emitter){const card=document.createElement('section');card.className='panel source '+(id==='B'?'b':'');card.id='card'+id;card.innerHTML=`<header><h2>波源${id}</h2><button id="toggle${id}" class="primary" aria-pressed="false">振動を開始</button></header><fieldset id="fields${id}"><div class="control"><label for="lambda${id}">波長 λ (仮想単位)</label><input id="lambda${id}" type="range" min="5" max="40" step="0.1" value="20"><input id="lambdaN${id}" aria-label="波源${id}の波長" type="number" min="5" max="40" step="0.1" value="20"></div><div class="control"><label for="freq${id}">周波数 f (Hz)</label><input id="freq${id}" type="range" min="0.25" max="2" step="0.001" value="0.5"><input id="freqN${id}" aria-label="波源${id}の周波数 Hz" type="number" min="0.25" max="2" step="0.001" value="0.5"></div><div class="control"><label for="amp${id}">振幅</label><input id="amp${id}" type="range" min="0" max="1.5" step="0.05" value="1"><input id="ampN${id}" aria-label="波源${id}の振幅" type="number" min="0" max="1.5" step="0.05" value="1"></div></fieldset>`;$('cards').append(card);
+ for(const kind of ['lambda','freq','amp'])for(const suffix of ['', 'N']){const el=$(kind+suffix+id);el.addEventListener(suffix?'change':'input',()=>{let v=Number(el.value);if(!Number.isFinite(v)||el.value===''){sync(id,emitter);return}v=Math.max(Number(el.min),Math.min(Number(el.max),v));if(kind==='lambda')emitter.frequency=SPEED/v;else if(kind==='freq')emitter.frequency=v;else emitter.amplitude=v;sync(id,emitter)})}
+ $('toggle'+id).onclick=()=>{emitter.on=!emitter.on;sync(id,emitter);};}
+function sync(id,e){for(const [name,value] of [['lambda',SPEED/e.frequency],['freq',e.frequency],['amp',e.amplitude]]){ $(name+id).value=value;$(name+'N'+id).value=Number(value.toFixed(5))} $('toggle'+id).textContent=e.on?'振動を停止':'振動を開始';$('toggle'+id).setAttribute('aria-pressed',String(e.on));}
+makeCard('A',a);makeCard('B',b);
+function setAvailability(){$('sumLabel').innerHTML=mode==='b'?'合成波（u = u<sub>A</sub> + u<sub>B</sub>）':mode==='wall'?'合成波（u = 入射波 + 反射波）':'合成波（u = u<sub>A</sub>）';const enabled=mode==='b';$('fieldsB').disabled=!enabled;$('toggleB').disabled=!enabled;$('cardB').classList.toggle('disabled',!enabled);$('both').hidden=!enabled;$('wallControl').hidden=mode!=='wall';$('legB').hidden=mode==='none';$('legA').innerHTML='<i class="dot" style="background:#167f91"></i>'+(mode==='b'?'Aの波':'進行波');$('legB').innerHTML='<i class="dot" style="background:#c16a39"></i>'+(mode==='wall'?'反射波':'Bの波')}
+function reset(){a.clear();b.clear();tick=0;accumulator=0;sync('A',a);sync('B',b);draw()}
+$('reset').onclick=reset;$('pause').onclick=()=>{paused=!paused;accumulator=0;$('pause').textContent=paused?'時間を再生':'時間を一時停止';$('pause').setAttribute('aria-pressed',String(paused))};$('mode').onchange=event=>{if(event.target.name!=='mode')return;mode=event.target.value;reset();a.on=true;sync('A',a);setAvailability()};$('wall').onchange=()=>{reflection=$('wall').value==='fixed'?-1:1;reset()};$('both').onclick=()=>{a.on=b.on=true;sync('A',a);sync('B',b);};
+const canvas=$('plot'),ctx=canvas.getContext('2d');let W=900,H=340;
+function resize(){const r=canvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;W=r.width;H=r.height;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
+function draw(){if(!W)return;const left=46,right=W-18,top=32,bottom=H-40,mid=(top+bottom)/2,scale=(bottom-top)/6.6,X=x=>left+(right-left)*x/100,Y=y=>mid-y*scale,t=tick*DT;ctx.clearRect(0,0,W,H);ctx.font='12px system-ui';ctx.lineWidth=1;for(let y=-3;y<=3;y++){ctx.strokeStyle=y===0?'#9eafb9':'#e9eef1';ctx.beginPath();ctx.moveTo(left,Y(y));ctx.lineTo(right,Y(y));ctx.stroke();ctx.fillStyle='#72838c';ctx.textAlign='right';ctx.fillText(String(y),left-10,Y(y)+4)}for(let x=0;x<=100;x+=20){ctx.strokeStyle='#edf1f3';ctx.beginPath();ctx.moveTo(X(x),top);ctx.lineTo(X(x),bottom);ctx.stroke();ctx.textAlign='center';ctx.fillStyle='#72838c';ctx.fillText(String(x),X(x),bottom+20)}ctx.textAlign='left';ctx.fillText('波の値 u',left,17);ctx.textAlign='right';ctx.fillText('位置 x',right,H-3);
+ if(mode==='wall'){ctx.fillStyle='#edf0f2';ctx.fillRect(X(80),top,X(100)-X(80),bottom-top);ctx.strokeStyle='#697b84';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(X(80),top);ctx.lineTo(X(80),bottom);ctx.stroke()}
+ const count=Math.ceil((right-left)*1.2),max=mode==='wall'?80:100;function curve(part,color,width,dashed){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dashed?[5,4]:[]);ctx.beginPath();for(let i=0;i<=count;i++){const x=max*i/count,v=field(a,b,t,x,mode,reflection),y=part===2?v[0]+v[1]:v[part];if(i===0)ctx.moveTo(X(x),Y(y));else ctx.lineTo(X(x),Y(y))}ctx.stroke();ctx.setLineDash([])}
+ if($('components').checked){curve(0,'#167f9199',1.5,true);if(mode!=='none')curve(1,'#c16a39aa',1.5,true)}curve(2,'#25323a',2.4,false);
+ for(const [x,label,color] of [[20,'A','#167f91'],...(mode==='b'?[[80,'B','#c16a39']]:[])]){ctx.fillStyle=color;ctx.textAlign='center';ctx.fillText(label,X(x),top-7);const v=field(a,b,t,x,mode,reflection);ctx.beginPath();ctx.arc(X(x),Y(v[0]+v[1]),4.5,0,2*Math.PI);ctx.fill()}
+ if(mode==='wall'){ctx.fillStyle='#52656e';ctx.textAlign='right';ctx.fillText(reflection===-1?'固定端':'自由端',X(80)-7,top-7)}}
+function frame(now){if(last&&!paused){accumulator+=Math.min((now-last)/1000,.1);while(accumulator>=DT){a.step();b.step();tick++;accumulator-=DT}}last=now;draw();requestAnimationFrame(frame)}
+a.on=true;sync('A',a);setAvailability();new ResizeObserver(resize).observe(canvas);requestAnimationFrame(frame);
+</script></body></html>

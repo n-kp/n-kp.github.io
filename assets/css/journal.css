@@ -21,4 +21,6 @@ html:not([data-bs-theme='dark']) body { background: #fcfbf8; }
 .journal-posts p { margin-bottom: 0; font-size: .9rem; }
 .simulator-list li { margin-bottom: .8rem; }
 .simulator-frame { display: block; width: 100%; height: 600px; border: 0; background: #fff; }
+.content .simulator-frame { margin-bottom: 1lh; }
+.content .article-disclaimer { color: var(--text-muted-color, #757575); font-size: .875rem; line-height: 1.8; margin-top: 1.5rem; }
 a:focus-visible,button:focus-visible { outline: 3px solid var(--journal-accent); outline-offset: 4px; }
