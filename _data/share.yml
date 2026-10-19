@@ -1,1 +1,10 @@
-platforms: []
+platforms:
+  - type: X
+    icon: fa-brands fa-x-twitter
+    link: 'https://twitter.com/intent/tweet?text=TEXT'
+  - type: Facebook
+    icon: fa-brands fa-facebook-f
+    link: 'https://www.facebook.com/sharer/sharer.php?u=URL'
+  - type: Bluesky
+    icon: fa-brands fa-bluesky
+    link: 'https://bsky.app/intent/compose?text=TEXT'

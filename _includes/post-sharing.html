@@ -1,0 +1,17 @@
+{% assign share_url = page.url | absolute_url %}
+{% capture share_text %}{{ page.title }} {{ share_url }}{% endcapture %}
+{% assign encoded_text = share_text | url_encode %}
+{% assign encoded_url = share_url | url_encode %}
+<nav class="journal-share" aria-label="この記事を共有">
+  <span class="text-muted">共有</span>
+  {% for platform in site.data.share.platforms %}
+    {% assign share_link = platform.link | replace: 'TEXT', encoded_text | replace: 'URL', encoded_url %}
+    <a href="{{ share_link | escape }}" target="_blank" rel="noopener noreferrer"
+       title="{{ platform.type }}で共有" aria-label="{{ platform.type }}で共有（新しいタブで開く）"><i class="fa-fw {{ platform.icon }}" aria-hidden="true"></i></a>
+  {% endfor %}
+  <button id="copy-link" type="button" class="btn" aria-label="記事のURLをコピー"
+          data-bs-toggle="tooltip" data-bs-placement="top" title="URLをコピー"
+          data-title-succeed="コピーしました">
+    <i class="fa-solid fa-link fa-fw pe-none" aria-hidden="true"></i>
+  </button>
+</nav>
