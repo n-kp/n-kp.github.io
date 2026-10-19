@@ -97,6 +97,7 @@ script_includes:
       {% include post-edit.html lang=lang %}
     </div>
 
+    <div class="journal-tags-share">
     <!-- tags -->
     {% if page.tags.size > 0 %}
       <div class="post-tags">
@@ -112,6 +113,10 @@ script_includes:
       </div>
     {% endif %}
 
+      {% include post-sharing.html lang=lang %}
+    </div>
+
+    {% if site.data.locales[lang].copyright.license.template %}
     <div
       class="
         post-tail-bottom
@@ -130,8 +135,8 @@ script_includes:
         {% endif %}
       </div>
 
-      {% include post-sharing.html lang=lang %}
     </div>
+    {% endif %}
     <!-- .post-tail-bottom -->
   </div>
   <!-- div.post-tail-wrapper -->

@@ -26,6 +26,9 @@ html:not([data-bs-theme='dark']) body { background: #fcfbf8; }
 .content .article-supplement { color: var(--text-muted-color, #757575); font-size: .875rem; line-height: 1.8; margin-bottom: 1lh; }
 .content .article-supplement p { font-size: inherit; line-height: inherit; }
 .journal-share { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-size: .875rem; }
+.journal-tags-share { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; }
+.journal-tags-share .post-tags { margin: 0; min-width: 0; }
+.journal-tags-share .journal-share { margin-left: auto; }
 .journal-share > span { margin-right: .25rem; }
 .journal-share a, .journal-share button { display: inline-flex; justify-content: center; align-items: center; width: 2.75rem; height: 2.75rem; padding: 0; border: 0; border-radius: .35rem; background: transparent; color: var(--text-muted-color, #757575); font-size: 1.1rem; text-decoration: none; }
 .journal-share a:hover, .journal-share button:hover { color: var(--link-color, #245e58); }
