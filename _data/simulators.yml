@@ -1,5 +1,5 @@
 - name: 波の基本
-  version: '1.0'
+  version: '1.2'
   label: 一次元の伝播・干渉・反射
   url: /posts/wave-basics/
 - name: 波面

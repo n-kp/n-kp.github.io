@@ -2,6 +2,7 @@
 layout: post
 title: '波の基本—伝播・干渉・反射'
 date: 2026-10-18 00:00:00 +0900
+last_modified_at: 2026-10-19 00:00:00 +0900
 categories: [光学]
 tags: [波, 光学入門]
 series: optics
@@ -13,24 +14,28 @@ permalink: /posts/wave-basics/
 ---
 ## この記事のポイント
 
-- 波の基本概念
+- 光学の前提として、まずは波の基本概念をとらえる
 - 波長・周波数・振幅・位相の関係
 - 波の重ね合わせと反射
 
-<iframe class="simulator-frame" src="{{ '/assets/simulators/wave-1d-v1.0.html' | relative_url }}" title="波の基本—伝播・干渉・反射"></iframe>
+<iframe class="simulator-frame" src="{{ '/assets/simulators/wave-1d-v1.2.html' | relative_url }}" title="波の基本—伝播・干渉・反射"></iframe>
 <script src="{{ '/assets/js/simulator-frame.js' | relative_url }}" defer></script>
 
 
 
 波は、電場や圧力などの変化量が空間を伝わっていく現象である。水面の波、音、光では変化する量や伝わる仕組みが異なるが、波としての振る舞いはほとんど共通である。
 
-このシミュレータは、横軸に位置、縦軸に波の値（位置のずれ、圧力、電場の変化など）を置き、時空間（時間を含めた空間世界）の中で**波形**がどのように伝わっていくかを示している。
+このシミュレータは、上段に媒質の動きを点で、下段に横軸を位置、縦軸を波の値とした**波形**を示している。
 
 ## 伝播
 
 波源が持続的あるいは一時的に振動すると、その変化が周囲へ連続的に**伝播**する。シミュレータでは、波源A、または波源Bから左右へ波が広がる。
 
 ただし、波形の移動はそこにある物質の移動と同値ではない。波形は左右に進む一方、一つの位置に注目すると、その値は時間とともに変動するものの振動の中心は移動しない。
+
+## 横波と縦波
+
+波の進む向きに対して、振動の向きが垂直な波を**横波**、平行な波を**縦波**という。光は、電場と磁場が進行方向に垂直に振動する横波である。楽器などの弦を伝わる波も横波、空気中を伝わる音は縦波の例である。
 
 ## 波長・周波数・振幅・位相
 
@@ -70,6 +75,7 @@ $$
 
 ## 参考資料
 
+- OpenStax, [University Physics, Vol. 1, §16.1 Traveling Waves](https://openstax.org/books/university-physics-volume-1/pages/16-1-traveling-waves)
 - OpenStax, [University Physics, Vol. 1, §16.2 Mathematics of Waves](https://openstax.org/books/university-physics-volume-1/pages/16-2-mathematics-of-waves)
 - OpenStax, [University Physics, Vol. 1, §16.5 Interference of Waves](https://openstax.org/books/university-physics-volume-1/pages/16-5-interference-of-waves)
 

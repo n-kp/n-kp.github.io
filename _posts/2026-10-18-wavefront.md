@@ -2,6 +2,7 @@
 layout: post
 title: '波面から見る波の伝播と回折'
 date: 2026-10-18 00:00:00 +0900
+last_modified_at: 2026-10-19 00:00:00 +0900
 categories: [光学]
 tags: [波, 光学入門]
 series: optics
