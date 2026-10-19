@@ -23,4 +23,6 @@ html:not([data-bs-theme='dark']) body { background: #fcfbf8; }
 .simulator-frame { display: block; width: 100%; height: 600px; border: 0; background: #fff; }
 .content .simulator-frame { margin-bottom: 1lh; }
 .content .article-disclaimer { color: var(--text-muted-color, #757575); font-size: .875rem; line-height: 1.8; margin-top: 1.5rem; }
+.content .article-supplement { color: var(--text-muted-color, #757575); font-size: .875rem; line-height: 1.8; margin-bottom: 1lh; }
+.content .article-supplement p { font-size: inherit; line-height: inherit; }
 a:focus-visible,button:focus-visible { outline: 3px solid var(--journal-accent); outline-offset: 4px; }

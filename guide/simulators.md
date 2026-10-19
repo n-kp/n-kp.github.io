@@ -10,7 +10,7 @@ These educational simulators explore waves, refraction, focusing and aberrations
 | --- | --- | --- |
 | Wave basics v1.2 | [Source](../assets/simulators/wave-1d-v1.2.html) | Transverse and longitudinal particle motion, one-dimensional propagation, interference, and fixed- and free-end reflection |
 | Wavefront v1.1 | [Source](../assets/simulators/wavefront-v1.1.html) | Point sources, reflection, slit diffraction and interference |
-| Refraction v1.1 | [Source](../assets/simulators/refraction-v1.1.html) | Reflection, refraction, total internal reflection and dispersion |
+| Refraction v1.2 | [Source](../assets/simulators/refraction-v1.2.html) | Reflection, refraction, total internal reflection and dispersion |
 | Lens v1.1 | [Source](../assets/simulators/lens-v1.1.html) | Plano-convex and plano-concave lenses, orientation, spherical and chromatic aberration, achromats |
 | Focus v1.1 | [Source](../assets/simulators/lens-focus-v1.1.html) | Focusing, aberrations, intensity near the focus, FWHM and the first dark Airy ring |
 
