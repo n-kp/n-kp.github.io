@@ -11,8 +11,8 @@
       {%- endif -%}
     </a>
 
-    <a class="site-title d-block" href="{{ '/' | relative_url }}">{{ site.title }}</a>
-    <p class="site-subtitle fst-italic mb-0">{{ site.tagline | escape | newline_to_br }}</p>
+    <a class="site-title d-block" href="{{ '/' | relative_url }}">{% assign title_lines = site.title | split: ', ' %}{% for line in title_lines %}<span>{{ line | escape }}{% unless forloop.last %},{% endunless %}</span>{% endfor %}</a>
+    <p class="site-owner">¬(¬Kp)</p>
   </header>
   <!-- .profile-wrapper -->
 

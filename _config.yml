@@ -2,17 +2,15 @@
 theme: jekyll-theme-chirpy
 lang: ja-JP
 timezone: Asia/Tokyo
-title: '¬(¬Kp)'
-tagline: |-
-  The Shape of the World,
-  the World of Shape
+title: 'The Shape of the World, the World of Shape'
+tagline: ''
 description: 「形」の科学と医学／医療、翻ってその世界の「形」について、とりとめもなく思案する。
 url: 'https://n-kp.github.io'
 baseurl: ''
 social:
   name: n-kp
 theme_mode:
-avatar: /assets/img/blog-logo.svg
+avatar: /assets/img/n-kp-logo-stacked.png
 toc: true
 comments:
   provider:
